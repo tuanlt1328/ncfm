@@ -1,11 +1,16 @@
 # -*- mode: python ; coding: utf-8 -*-
 
+from PyInstaller.utils.hooks import collect_dynamic_libs
+
+binaries = collect_dynamic_libs('curses')
 
 a = Analysis(
     ['src/ncfm.py'],
     pathex=[],
-    binaries=[],
-    datas=[],
+    binaries=binaries,
+    datas=[
+        ('/usr/share/terminfo', 'terminfo'),
+    ],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},

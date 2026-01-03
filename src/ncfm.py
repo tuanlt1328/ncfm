@@ -2,15 +2,21 @@
 import os
 from glob import glob
 import argparse
-import curses
 import traceback
 import subprocess
 import shutil
 import ncfm_config
 from datetime import datetime, timezone
 from sys import argv, exit, executable
+import sys
 
+if getattr(sys, 'frozen', False):
+    os.environ.setdefault(
+        "TERMINFO",
+        os.path.join(sys._MEIPASS, "terminfo")
+    )
 
+import curses
 
 stdscr = None
 prompt = ncfm_config.DEFAULT_PROMPT
