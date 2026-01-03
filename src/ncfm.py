@@ -96,6 +96,9 @@ def askyesno(prompt: str, x:int, y:int, default:bool = False) -> bool:
 
 def get_entry(hidden: bool = False):
     absPaths = glob(os.path.join(os.getcwd(),"**"), include_hidden=hidden)
+    for path in absPaths:
+        if not os.path.exists(path):
+            absPaths.remove(path)
     possibleEntries = [os.path.split(path)[1] for path in absPaths]
     if(os.getcwd()!="/"):
         possibleEntries.append('..')
@@ -147,11 +150,14 @@ def action_paste():
         prompt = f"{last} already exist, aborted."
         return
     if cut:
-        execute(shutil.move, clipboard, os.path.join(os.getcwd(), last))
+        if os.path.isdir(clipboard):
+            execute(shutil.move, clipboard, os.path.join(os.getcwd(), last))
+        else:
+            execute(shutil.move, clipboard, os.getcwd())
         clipboard = os.path.join(os.getcwd(), last)
         cut = False
     else:
-        if os.path.isdir:
+        if os.path.isdir(clipboard):
             execute(shutil.copytree, clipboard, os.path.join(os.getcwd(), last))
         else:
             execute(shutil.copy2, clipboard, os.path.join(os.getcwd(), last))
@@ -189,7 +195,10 @@ def action_delete():
     fullPath = os.path.join(os.getcwd(), entries[selected])
     with open(os.path.join(os.path.expanduser(ncfm_config.TRASH_INFO),f"{entries[selected]}.trashinfo"), "w") as tri:
         tri.write(f"[Trash Info]\nPath={fullPath}\nDeletionDate={datetime.now().strftime("%Y-%m-%dT%H:%M:%S")}")
-    execute(shutil.move, fullPath, os.path.join(os.path.expanduser(ncfm_config.TRASH_DATA), entries[selected]))
+    if os.path.isdir(clipboard):
+        execute(shutil.move, fullPath, os.path.join(os.path.expanduser(ncfm_config.TRASH_DATA), entries[selected]))
+    else:
+        execute(shutil.move, fullPath, os.path.expanduser(ncfm_config.TRASH_DATA))
     if selected >= len(entries):
         selected = len(entries)-1
 
@@ -218,7 +227,7 @@ try:
         if prompt == ncfm_config.DEFAULT_PROMPT and os.getuid() == 0:
             prompt = ncfm_config.ELEVATED_PROMPT
         stdscr.addstr(curses.LINES-1, 0, " "*(curses.COLS-1))
-        stdscr.addstr(curses.LINES-1, 0, prompt)
+        stdscr.addnstr(curses.LINES-1, 0, prompt, curses.COLS)
         prompt = ncfm_config.DEFAULT_PROMPT
 
         
@@ -232,19 +241,19 @@ try:
         for i in range(window, window+WINDOW_SIZE):
             if i >= len(entries):
                 break
-            tp="f"
             modified_time = datetime.fromtimestamp(os.path.getmtime(entries[i]), get_timezone())
+            tp="f"
             if os.path.isdir(entries[i]):
                 tp = "d"
             if os.path.islink(entries[i]):
                 tp = "l"
             line = f"{tp}  {modified_time.strftime(ncfm_config.DEFAULT_DATETIME)} \t {entries[i]}"
             if i == selected:
-                stdscr.addstr(i-window+WINDOW_START,0," "*curses.COLS, curses.A_REVERSE)
-                stdscr.addstr(i-window+WINDOW_START,0,line, curses.A_REVERSE)
+                stdscr.addstr(i-window+WINDOW_START,0," "*(curses.COLS), curses.A_REVERSE)
+                stdscr.addnstr(i-window+WINDOW_START,0,line, curses.COLS-2, curses.A_REVERSE)
             else:
-                stdscr.addstr(i-window+WINDOW_START,0," "*curses.COLS)
-                stdscr.addstr(i-window+WINDOW_START,0,line)
+                stdscr.addstr(i-window+WINDOW_START,0," "*(curses.COLS))
+                stdscr.addnstr(i-window+WINDOW_START,0,line, curses.COLS-2)
 
         stdscr.refresh()
         read = stdscr.getkey()

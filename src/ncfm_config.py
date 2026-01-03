@@ -5,7 +5,7 @@ START_FROM = "path to start from"
 
 DEFAULT_SHELL = "bash"
 DEFAULT_LAUNCHER = "xdg-open"
-DEFAULT_PROMPT = "ncfm 0.1.1"
+DEFAULT_PROMPT = "ncfm 0.1.2"
 ELEVATED_PROMPT = "Acting as a superuser, be careful!"
 DEFAULT_DATETIME = "%d %b, %Y %H:%M:%S %Z"
 DEFAULT_ELEVATOR = "sudo"
