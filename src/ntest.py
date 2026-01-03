@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+#A small snippet to get special key code
 import curses
 from curses import wrapper
 
